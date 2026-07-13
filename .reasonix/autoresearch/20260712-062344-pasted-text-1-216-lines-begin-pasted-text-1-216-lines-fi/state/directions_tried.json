@@ -1,0 +1,23 @@
+[
+  {
+    "fingerprint": "task-301224dd",
+    "summary": "## 改动总结",
+    "first_seen_iteration": 1,
+    "last_seen_iteration": 1,
+    "count": 1
+  },
+  {
+    "fingerprint": "readme-c59611bd",
+    "summary": "README 已按照微信文章风格完成了\"教学叙事 + 速查骨架\"的混合改写，所有内容落地到文件中。",
+    "first_seen_iteration": 2,
+    "last_seen_iteration": 2,
+    "count": 1
+  },
+  {
+    "fingerprint": "rmdir-yarn-mkdir-rmdir-npm-yarn-6bf21a6a",
+    "summary": "所有原始命令都已覆盖（`rmdir` 和 `yarn` 分别在组合标题 `mkdir/rmdir` 和 `npm/yarn` 中）。验证完毕。",
+    "first_seen_iteration": 3,
+    "last_seen_iteration": 3,
+    "count": 1
+  }
+]
