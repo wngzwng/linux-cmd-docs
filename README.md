@@ -812,29 +812,49 @@ dd if=/dev/sda of=backup.img bs=4M
 
 ### `tar` — 打包 + 压缩
 
+> 📖 详细教程：[tar.md](tar.md) — 从踩坑排雷到面试题，覆盖了 tar 所有你需要知道的内容。
+
 **场景**：你要把一个项目目录发给别人，或者备份到另一台机器：
 
 ```bash
-# 打包（不压缩）
-tar -cvf archive.tar dir/
-
 # 打包 + gzip 压缩（最常用）
 tar -czvf archive.tar.gz dir/
 
 # 打包 + 更好的压缩比
 tar -cjvf archive.tar.bz2 dir/
+
+# 打包 + 最高压缩率（慢）
+tar -cJvf archive.tar.xz dir/
 ```
 
 解压对应：
 
 ```bash
-tar -xvf archive.tar               # 解包
 tar -xzvf archive.tar.gz           # 解压 tar.gz
 tar -xjvf archive.tar.bz2          # 解压 tar.bz2
-tar -tf archive.tar.gz             # 查看包里的内容
+tar -xvf archive.tar               # 解包（不压缩的）
+tar -tzvf archive.tar.gz           # 只看内容，不解压
+tar -xzvf archive.tar.gz -C /opt/  # 解压到指定目录
 ```
 
-> 参数速记：`c`=创建、`x`=解压、`z`=gzip、`j`=bzip2、`v`=显示过程、`f`=文件名、`t`=查看
+常用进阶：
+
+```bash
+# 打包时排除某些文件
+tar -czvf project.tar.gz --exclude="node_modules" --exclude="*.log" ./project
+
+# 只打包符合条件的文件（配合 find）
+find /var/log -name "*.log" -mtime +7 | tar -czvf old-logs.tar.gz -T -
+
+# 打包不写中间文件，直接传到远程（-f - 输出到标准输出）
+tar -czf - /var/log | ssh user@host "cat > /backup/logs.tar.gz"
+```
+
+> 参数速记：`c`=创建、`x`=解压、`z`=gzip、`j`=bzip2、`J`=xz、`v`=显示过程、`f`=文件名（紧跟）、`t`=查看、`-C`=指定目录
+>
+> ⚠️ 常见坑：`-f` 后面紧跟的一定是文件名；打包绝对路径时 tar 会自动去掉开头的 `/`
+>
+> 📖 以上每个细节的原理、更多坑、面试题，见 [tar.md](tar.md)。
 
 ### `gzip` / `gunzip` — 单文件压缩
 
