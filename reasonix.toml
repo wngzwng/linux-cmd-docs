@@ -1,0 +1,10 @@
+[agent]
+planner_model     = "deepseek-pro"   # 双模型协作：先规划，再执行
+subagent_model    = "deepseek-pro"   # 子 Agent 默认模型
+subagent_effort   = "high"               # 子 Agent 默认推理力度
+max_subagent_depth = 2                    # 允许子 Agent 再委托一层孙 Agent
+
+[skills]
+# 项目级 Skill 目录，Reasonix 自动发现
+paths = [".reasonix/skills"]
+
