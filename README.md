@@ -767,9 +767,20 @@ uptime                             # 运行时间 + 1/5/15 分钟平均负载
 
 ### `date` — 不只是看时间
 
+> 📖 详细教程：[date.md](date.md) — 时间格式化、计算、时区、时间戳互转，以及 macOS/Linux 差异踩坑全记录。
+
 ```bash
 date +%Y-%m-%d                     # 2024-01-01
 date +%Y%m%d_%H%M%S                # 20240101_120000——适合做文件名后缀
+date +%s                           # Unix 时间戳
+
+# 时间计算（GNU date）
+date -d "1 day ago" "+%F"          # 昨天
+date -d "next Monday" "+%F"        # 下周一
+date -d @1752460200 "+%F %T"       # 时间戳转可读时间
+
+# 备份命名实战
+cp config.json config.json.bak.$(date +%Y%m%d)
 ```
 
 ### `which` / `whereis` — 命令在哪
