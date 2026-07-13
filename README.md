@@ -597,15 +597,23 @@ sort file.txt | uniq -d           # 只显示有重复的行
 
 ### `wc` — 统计
 
+> 📖 详细教程：[wc.md](wc.md) — `-c` vs `-m` 的字节/字符陷阱、`-L`/`-w` 的实战场景、wc 在管道链中的"终点站"角色。
+
 ```bash
 wc file.txt                      # 行数 / 词数 / 字节数
 wc -l file.txt                   # 只看行数
 wc -w file.txt                   # 只看词数
 wc -c file.txt                   # 只看字节数
+wc -m file.txt                   # 只看字符数（中文友好）
 wc -l *.txt                      # 统计多个文件
-```
+wc -L file.txt                   # 最长行的长度
 
-> 💡 `wc -l` 是最常用的：统计代码行数、统计匹配结果数量、统计目录下文件数。
+# wc 在管道链里最常见的四个位置
+grep "ERROR" app.log | wc -l          # 多少个错误
+find . -name "*.go" | wc -l           # 多少个 Go 文件
+git diff --name-only HEAD~1 | wc -l   # 改了几个文件
+grep -v '^\s*#' nginx.conf | grep -v '^\s*$' | wc -l   # 有效配置行数
+```
 
 ---
 
