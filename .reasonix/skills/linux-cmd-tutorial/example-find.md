@@ -102,7 +102,7 @@ find /var/log -type d -name "*.old"
 find /var/log -type l
 ```
 
-`-type f`（file）限定文件，`-type d`（directory）限定目录，`-type l`（link）限定符号链接。**不加 `-type` 的话，目录也会被包含在结果里**——如果你后面跟了 `-delete`，而一个目录恰好满足条件，整个目录都会被删掉。
+`-type f`（file）限定文件，`-type d`（directory）限定目录，`-type l`（link）限定符号链接。**不加 `-type` 的话，目录也会被匹配**——如果你后面跟了 `-delete`，空目录会被删除（非空目录会因 `-delete` 报错跳过），但用 `-exec rm -rf` 则会递归删除整个目录。
 
 ---
 
@@ -150,7 +150,7 @@ find . -mmin -60    # 最近 1 小时改过的
 
 > 💡 注意精度：`-mtime n` 的定义是"文件数据在 n×24 小时前最后一次修改"，按 24 小时周期向下取整，不是精确到秒的"恰好 n 天前"。比如 `-mtime 1` 匹配的是 24-48 小时前修改的文件，而不是"昨天"。需要分钟级精度用 `-mmin`。
 
-> ⚠️ **ctime 不是"创建时间"！这是 Linux 新手最常见的误解之一。** Linux 大多数文件系统不记录创建时间。`ctime` 是 **inode 变更时间**——权限改了、硬链接数变了、所有者变了都会更新 `ctime`。你真正想找的"文件内容修改时间"是 **mtime**。`atime` 是访问时间（最后一次读），且现代 Linux 通常为了性能会关闭 `atime` 更新。
+> ⚠️ **ctime 不是"创建时间"！这是 Linux 新手最常见的误解之一。** `ctime` 是 **inode 变更时间**——权限改了、硬链接数变了、所有者变了都会更新 `ctime`。你真正想找的"文件内容修改时间"是 **mtime**。`atime` 是访问时间（最后一次读），现代 Linux 默认使用 `relatime`（只在 atime 早于 mtime 时才更新），而非完全关闭。部分现代文件系统（ext4、xfs、btrfs）支持 birth time，可通过 `stat` 或 `statx` 查看。
 
 ```bash
 # 配合 -ls 看详细信息——确认到底是哪些文件、什么时候改的
@@ -243,7 +243,7 @@ find . -maxdepth 1 -name "*.txt"
 find . -mindepth 2 -name "*.txt"
 ```
 
-> 💡 `-maxdepth` 和 `-mindepth` 是 GNU 扩展，BSD find 不支持。跨平台脚本可以用 `-path` 条件替代，或者用 `prune` 控制遍历。
+> 💡 `-maxdepth` 和 `-mindepth` 是 GNU 扩展，不同 BSD 实现支持情况不同（FreeBSD 已支持 `-maxdepth`）。跨平台脚本建议用 `-path` + `-prune` 控制遍历深度以确保兼容性。
 
 <!-- Layer 5: Pipeline 组合 (Step 5) -->
 ## 五、Pipeline 组合——把命令串起来
@@ -314,7 +314,7 @@ df -h /
 - **坑一：ctime ≠ 创建时间** → 文件内容修改看 mtime，inode 变更才看 ctime
 - **坑二：-exec 忘了 `\;` 直接报错** → `\;` 是 -exec 的结束标志，不是"随手的习惯"
 - **坑三：-delete 前不确认** → 先用 `-print` 或 `-ls` 看一眼，铁律不能忘
-- **坑四：不加 `-type f` 误操作目录** → 目录也匹配条件时，`-delete` 会把整个目录删掉
+- **坑四：不加 `-type f` 误匹配目录** → 目录也匹配条件时，`-delete` 可删空目录；`-exec rm -rf` 会递归删除非空目录
 - **坑五：`-size` 不带单位** → 默认是 512 字节块，数字完全不对。始终带单位（k/M/G）
 - **坑六：`-name` 用正则** → `-name` 是 shell glob（`*.log`），正则用 `-regex`
 - **坑七：`-perm 777` vs `-perm -777` vs `-perm /777`** → 精确匹配/全都设了/任意一个设了，差之毫厘

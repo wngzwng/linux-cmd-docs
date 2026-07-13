@@ -38,7 +38,7 @@ find /var/log -name "*.log" -mtime +30 -delete  # 确认无误后执行
 用 **加粗 + "不是…而是…"** 句式。这是教程"有深度"的核心标志。
 
 ```
-> ⚠️ **ctime 不是"创建时间"！** Linux 文件系统不记录创建时间。ctime 是 inode 变更时间——权限改了、硬链接数变了、所有者变了都会更新 ctime。
+> ⚠️ **ctime 不是"创建时间"！** Linux 传统文件系统不记录创建时间，但现代文件系统（ext4/xfs/btrfs）支持 birth time。ctime 是 inode 变更时间——权限改了、硬链接数变了、所有者变了都会更新 ctime。
 ```
 
 候选误解（按命令）：
@@ -114,7 +114,7 @@ find /var/log -name "*.log" -mtime +30 -delete  # 确认无误后执行
 - [ ] 每个 ❌ 示例是否**真的会报错**（不是"不推荐但能跑"）？
   - 如果只是"不推荐但 GNU 允许"，改标为"不推荐"并注明原因
 - [ ] 是否标注了 GNU 扩展 / POSIX 标准 / BSD 特有能力？
-  - 如 `find -maxdepth` 是 GNU 扩展，BSD find 不支持
+  - 如 `find -maxdepth` 是 GNU 扩展，不同 BSD 实现支持情况不同（FreeBSD 已支持）
   - 如 `sed -i` 的语法 GNU 和 BSD 不同
 - [ ] 管道组合中，前一个命令的**输出格式**是否确实匹配后一个命令的**输入格式**？
   - 验证边界情况：空格文件名、特殊字符、空输入
@@ -224,6 +224,6 @@ find . -name "*.log" | xargs grep "ERROR" | wc -l
 | find | `-exec` 是"shell 命令" | `-exec` 直接 exec，不经 shell |
 | find | `-mtime n` = "恰好 n 天前" | 按 24h 周期取整，非精确到秒 |
 | grep | `-e` 是"扩展正则" | `-E` 才是扩展正则，`-e` 是指定多个模式 |
-| du | `-h` 所有系统一致 | BSD du 不支持 `-d`，用 `-d` 替代 `--max-depth` |
+| du | `-h` 所有系统一致 | GNU du 用 `--max-depth`，BSD du 用 `-d`——参数不同但功能等价 |
 | sed | `-i` 不加后缀 | BSD sed 要求 `-i ''`，GNU sed 允许 `-i` 无参 |
 | tar | 选项前的 `-` 可有可无 | BSD tar 不需要 `-`，GNU tar 建议加 `-` 保持兼容 |

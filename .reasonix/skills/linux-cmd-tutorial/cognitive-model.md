@@ -124,7 +124,7 @@ kill  [信号]  [PID]                                        ← C 类
 
 | 能力轴 | 问题 | 选项 |
 |--------|------|------|
-| 协议 | TCP 还是 UDP？ | `-t`(TCP), `-u`(UDP), 不加=都看 |
+| 协议 | TCP 还是 UDP？ | `-t`(TCP), `-u`(UDP), 不加=默认仅 TCP（非全部协议） |
 | 状态 | 监听中还是已建立？ | `-l`(监听), `-a`(全部状态) |
 | 显示格式 | 数字还是服务名？ | `-n`(数字端口号), `-r`(反解主机名) |
 | 进程 | 背后是哪个进程？ | `-p`(显示进程信息，常需 sudo) |
@@ -160,7 +160,9 @@ kill  [信号]  [PID]                                        ← C 类
 第 3 步填入骨架：
   find  [/var/log]  [-name "*.log"]  [-mtime +7]  [-size +10M]  [-delete]
 
-→ find /var/log -name "*.log" -mtime +7 -size +10M -delete
+⚠️ 安全铁律——先预览，再执行：
+→ find /var/log -name "*.log" -mtime +7 -size +10M -print  # 第一步：确认范围
+→ find /var/log -name "*.log" -mtime +7 -size +10M -delete # 第二步：确认无误后执行
 ```
 
 ---
@@ -213,6 +215,21 @@ find . -name "*.log" -exec rm {}
 grep "error" -r -i /var/log
 grep -r -i "error" /var/log    # ✅ 推荐：options → pattern → files
 ```
+
+---
+
+## 忘了参数怎么办：先看本机帮助，别先搜索
+
+```bash
+command --help       # 快速查阅
+man command          # 完整手册
+
+# 在 man 页面里：/关键词 搜索，n 下一个，q 退出
+```
+
+常用英文关键词：list, show, process, file, socket, listen, numeric, recursive, filter, exclude
+
+> 💡 排障命令速查：查端口和连接→`ss`，查进程打开了什么→`lsof`，查进程状态→`ps`，查文件→`find`，查文本→`grep`。工具可以换，目标不变。
 
 ---
 
