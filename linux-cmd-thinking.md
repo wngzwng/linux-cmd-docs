@@ -70,7 +70,7 @@ tar -czvf backup.tar.gz /etc/nginx
 - **ss：** 查看当前机器的 socket 统计信息——谁在监听哪个端口、连接状态是什么
 - **lsof：** 列出进程打开的文件/资源——哪个进程打开了哪些文件、socket、管道
 
-> 💡 命令名本身就是线索：`ss` = **s**ocket **s**tatistics，`lsof` = **l**i**s**t **o**pen **f**iles，`ps` = **p**rocess **s**tatus，`grep` = **g**lobal **r**egular **e**xpression **p**rint。知道全称之后，「为什么 lsof 能查端口」这种困惑自然消解——网络 socket 在 Linux 里也是通过文件描述符来管理的。
+> 💡 命令名本身就是线索：`ss` = **s**ocket **s**tatistics，`lsof` = **l**i**s**t **o**pen **f**iles，`ps` = **p**rocess **s**tatus，`grep` = **g**lobal **r**egular **e**xpression **p**rint。知道全称之后，「为什么 lsof 能查端口」这种困惑自然消解——网络 socket 在 Linux 里也是通过文件描述符来管理的。（注意：这不是说所有东西都能 `cat`——更准确的理解是，Linux 把各种资源用类似文件的接口暴露出来，方便进程统一访问。）
 
 ---
 
@@ -120,6 +120,8 @@ tar -czvf backup.tar.gz /etc/nginx
 
 **理解了 IO 模型，很多参数就自然出现了。** 比如 grep 为什么有 `-r`？因为输入从「单文件」扩展到了「目录树」。为什么有 `-c`？因为输出从「匹配的行」变成了「数量」。
 
+> 💡 **并不是所有命令都遵循 Input→Transform→Output。** 像 `systemctl start nginx`、`docker restart`、`kubectl apply` 这类命令，处理的是系统状态而非数据流：`Current State → Desired State → Action`。你描述目标状态，命令负责把当前状态变成目标状态。这也是一种 IO 模型——只是输入是「期望状态」，输出是「状态变更结果」。
+
 ---
 
 ### 第 3 步：语法骨架——先把「句型」刻进脑子里
@@ -154,6 +156,7 @@ tar  [动作+压缩模式]  -f  [归档文件名]  [操作对象...]  [附加选
 tar  -c  -z  -v  -f  backup.tar.gz  /etc/nginx  --exclude="*.log"
 #    c=创建 z=gzip v=过程 f=文件名
 #    -f 是带参数选项，后面必须紧跟文件名
+#    短选项可以连写：-czvf 等价于 -c -z -v -f（tar 的历史兼容特性）
 ```
 
 **grep 的句型：**
@@ -310,6 +313,7 @@ wc                →  数一数有多少行
 
 ```bash
 find /var/log -mtime -7 -type f | xargs grep "ERROR" | wc -l
+# 💡 生产环境建议加 -print0 / -0 防止文件名含空格导致 xargs 切分错误
 ```
 
 ### Pipeline 的核心思维
@@ -415,6 +419,58 @@ Unix 文本处理核心——纯函数式的数据变换。
 ```
 
 前两步各用一句话，第三步写一行，第四步画一个表，加起来不超过 5 分钟。但做完这 5 分钟的训练，你对这个命令的认知就从「需要查的参数列表」变成了「可以自然组合的能力骨架」。
+
+---
+
+## 八、命令学习模板
+
+后续为任何命令写教程时，可以按这个骨架作为自检清单：
+
+```
+# Command: <命令名>
+
+## 1. Purpose
+一句话：它解决什么问题？
+
+## 2. IO Model
+输入是什么？输出是什么？
+（数据处理型：Input→Transform→Output / 状态管理型：Current→Desired→Action）
+
+## 3. Grammar
+命令 [槽位1] [槽位2] [槽位3]
+
+## 4. Capability Space
+能力轴  | 问题  | 选项
+-------|------|-----
+...    | ...  | ...
+
+## 5. Common Composition
+场景1: 需求 → 模型 → 命令
+场景2: ...
+
+## 6. Pitfalls
+最常见的陷阱及纠正
+```
+
+---
+
+## 九、后续方向
+
+这个思维模型是否成熟，可以用以下 10 个命令逐个验证——它们各代表一种命令范式：
+
+| 命令 | 范式 | 当前状态 |
+|------|------|---------|
+| find | 选择器（在集合中筛选+操作） | 已覆盖 |
+| grep | 选择器（模式匹配） | 已覆盖 |
+| tar | 构造器（创建归档） | 已覆盖 |
+| wc | 统计器（量化文本） | 已覆盖 |
+| ss | 观察器（查询 socket 状态） | 已覆盖 |
+| lsof | 观察器（查询进程资源） | 已覆盖 |
+| sed / awk | 转换器（文本流处理） | 待展开 |
+| systemctl / docker | 控制器（状态管理） | 待展开 |
+| rsync | 同步器（数据传输） | 待展开 |
+
+如果这 10 个命令都能套进五步模型，说明这个框架已经成熟。
 
 ---
 

@@ -72,7 +72,7 @@ grep  -i  "error"  app.log
 - **ss：** 查看当前机器的 socket 统计信息——谁在监听哪个端口、连接状态是什么
 - **lsof：** 列出进程打开的文件/资源——哪个进程打开了哪些文件、socket、管道
 
-> 💡 命令名本身就是线索：`ss` = **s**ocket **s**tatistics，`lsof` = **l**i**s**t **o**pen **f**iles，`ps` = **p**rocess **s**tatus，`grep` = **g**lobal **r**egular **e**xpression **p**rint。知道全称之后，「为什么 lsof 能查端口」这种困惑自然消解——因为网络 socket 在 Linux 里也是通过文件描述符来管理的。
+> 💡 命令名本身就是线索：`ss` = **s**ocket **s**tatistics，`lsof` = **l**i**s**t **o**pen **f**iles，`ps` = **p**rocess **s**tatus，`grep` = **g**lobal **r**egular **e**xpression **p**rint。知道全称之后，「为什么 lsof 能查端口」这种困惑自然消解——因为网络 socket 在 Linux 里也是通过文件描述符来管理的。（注意：这不是说所有东西都能 `cat`——更准确的理解是，Linux 把各种资源用类似文件的接口暴露出来，方便进程统一访问。）
 
 ---
 
@@ -89,6 +89,8 @@ grep  -i  "error"  app.log
 **ss 的 IO 模型：** 内核 socket 表 → 按协议/状态筛选 → 格式化 → socket 列表
 
 **lsof 的 IO 模型：** 内核打开文件表 → 按类型/进程筛选 → 格式化 → 打开文件列表
+
+> 💡 **并不是所有命令都遵循 Input→Transform→Output。** 像 `systemctl start nginx`、`docker restart`、`kubectl apply` 这类命令，处理的是系统状态而非数据流：`Current State → Desired State → Action`。你描述目标状态，命令负责把当前状态变成目标状态。这也是一种 IO 模型——只是输入是「期望状态」，输出是「状态变更结果」。
 
 ---
 
@@ -205,6 +207,7 @@ find (找到文件) → grep (过滤内容) → wc (统计数量)
 
 ```bash
 find /var/log -mtime -7 -type f | xargs grep "ERROR" | wc -l
+# 💡 生产环境建议加 -print0 / -0 防止文件名含空格导致 xargs 切分错误
 ```
 
 ---
@@ -314,6 +317,58 @@ man command          # 完整手册
    - ❌ 标记的例子是否**真的会报错**（不是「不推荐但能跑」）？如果能跑，改标为「不推荐」并注明原因
    - 标注行为依赖的系统：是 GNU 扩展、POSIX 标准、还是 BSD 特有？
    - 如果是管道组合，确认每个命令的输入输出格式确实匹配（前一个命令的输出格式 = 后一个命令期望的输入格式）
+
+---
+
+## 命令学习模板
+
+后续为任何命令写教程时，可以按这个骨架作为自检清单：
+
+```
+# Command: <命令名>
+
+## 1. Purpose
+一句话：它解决什么问题？
+
+## 2. IO Model
+输入是什么？输出是什么？
+（数据处理型：Input→Transform→Output / 状态管理型：Current→Desired→Action）
+
+## 3. Grammar
+命令 [槽位1] [槽位2] [槽位3]
+
+## 4. Capability Space
+能力轴  | 问题  | 选项
+-------|------|-----
+...    | ...  | ...
+
+## 5. Common Composition
+场景1: 需求 → 模型 → 命令
+场景2: ...
+
+## 6. Pitfalls
+最常见的陷阱及纠正
+```
+
+---
+
+## 后续方向
+
+这个思维模型是否成熟，可以用以下 10 个命令逐个验证：
+
+| 命令 | 范式 | 当前状态 |
+|------|------|---------|
+| find | 选择器 | 已覆盖 |
+| grep | 选择器 | 已覆盖 |
+| tar | 构造器 | 已覆盖 |
+| wc | 统计器 | 已覆盖 |
+| ss | 观察器 | 已覆盖 |
+| lsof | 观察器 | 已覆盖 |
+| sed / awk | 转换器 | 待展开 |
+| systemctl / docker | 控制器 | 待展开 |
+| rsync | 同步器 | 待展开 |
+
+如果这 10 个命令都能套进五步模型，说明这个框架已经成熟。
 
 ---
 
