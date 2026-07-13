@@ -90,7 +90,11 @@ grep  -i  "error"  app.log
 
 **lsof 的 IO 模型：** 内核打开文件表 → 按类型/进程筛选 → 格式化 → 打开文件列表
 
-> 💡 **并不是所有命令都遵循 Input→Transform→Output。** 像 `systemctl start nginx`、`docker restart`、`kubectl apply` 这类命令，处理的是系统状态而非数据流：`Current State → Desired State → Action`。你描述目标状态，命令负责把当前状态变成目标状态。这也是一种 IO 模型——只是输入是「期望状态」，输出是「状态变更结果」。
+> 💡 **并不是所有命令都遵循 Input→Transform→Output。** 像 `systemctl start nginx`、`docker restart`、`kubectl apply` 这类命令，处理的是系统状态而非数据流：`Current State → Desired State → Action`。你描述目标状态，命令负责把当前状态变成目标状态。
+>
+> 而且这类命令背后通常有一个**对象层级**。比如 tmux：`server → session → window → pane`。不理解这个，`tmux send-keys -t dev:0.1` 里 `dev:0.1` 就是天书。理解了，`session:window.pane` 就是三个坐标。
+>
+> **学习方法论：对于有对象层级的命令，先画对象模型，再套五步。** 数据工具关心「数据如何流动」，系统工具关心「对象如何存在、变化、销毁」——这是整个五步模型最重要的前置判断。
 
 ---
 

@@ -120,7 +120,24 @@ tar -czvf backup.tar.gz /etc/nginx
 
 **理解了 IO 模型，很多参数就自然出现了。** 比如 grep 为什么有 `-r`？因为输入从「单文件」扩展到了「目录树」。为什么有 `-c`？因为输出从「匹配的行」变成了「数量」。
 
-> 💡 **并不是所有命令都遵循 Input→Transform→Output。** 像 `systemctl start nginx`、`docker restart`、`kubectl apply` 这类命令，处理的是系统状态而非数据流：`Current State → Desired State → Action`。你描述目标状态，命令负责把当前状态变成目标状态。这也是一种 IO 模型——只是输入是「期望状态」，输出是「状态变更结果」。
+> 💡 **并不是所有命令都遵循 Input→Transform→Output。** 像 `systemctl start nginx`、`docker restart`、`kubectl apply` 这类命令，处理的是系统状态而非数据流：`Current State → Desired State → Action`。你描述目标状态，命令负责把当前状态变成目标状态。
+>
+> 而且这类命令背后通常有一个**对象层级**。比如 tmux 的子命令（`send-keys`、`capture-pane`、`new-window`）都围绕同一个层级展开：
+>
+> ```
+> server → session → window → pane
+> ```
+>
+> 不理解这个层级，`tmux send-keys -t dev:0.1` 里的 `dev:0.1` 就是一行天书。理解了，`session:window.pane` 就是三个坐标而已。
+>
+> **学习方法论：对于有对象层级的命令，先画对象模型，再套五步。** 花一分钟画出「它管理什么对象？对象之间什么关系？有什么生命周期？」理解了这个，所有子命令的语法都变得自然——它们不过是在对象层级上做 CRUD。
+>
+> | 命令类型 | 需要先画对象模型？ | 代表命令 |
+> |---------|:---:|------|
+> | 数据处理型 | 不需要 | grep, find, tar, wc, sed, awk |
+> | 状态管理型 | ✅ 需要 | tmux, docker, kubectl, systemctl, git |
+>
+> 数据工具关心「数据如何流动」，系统工具关心「对象如何存在、变化、销毁」。两类命令的 IO 模型不同，学习路径也不同——这是整个五步模型最重要的前置判断。
 
 ---
 
