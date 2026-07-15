@@ -1,5 +1,5 @@
 
-# brew：macOS 上"缺失的包管理器"——没装它之前 macOS 的命令行只算半成品
+# brew：macOS 的包管理器——安装 Linux 常用工具，用 GNU 版替换 BSD 命令
 
 macOS 自带了很多 Unix 命令（BSD 版本），但你很快就会发现两件事：
 

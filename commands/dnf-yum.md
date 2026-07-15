@@ -1,5 +1,5 @@
 
-# dnf / yum：Fedora/RHEL/CentOS 上的包管理——以及 yum 为什么该退休了
+# dnf / yum：RHEL 系包管理——`history undo` 回退操作，yum 到 dnf 的迁移
 
 如果你用的是 Fedora、RHEL、CentOS、Rocky Linux、AlmaLinux——你用的包管理器叫 `dnf`（或它的前身 `yum`）。
 

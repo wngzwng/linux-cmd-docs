@@ -1,5 +1,5 @@
 
-# apt：Debian/Ubuntu 上你每天都在用的包管理——但这些用法可能没试过
+# apt：Debian/Ubuntu 包管理——`purge` vs `remove`、`autoremove` 清理依赖
 
 `apt install` 和 `apt update` 已经刻在了每个 Ubuntu 用户的肌肉记忆里。但 apt 身上还有几个你每天都能用到但可能不知道的能力——比如 `apt list --upgradable`、`apt purge`、`apt autoremove`。
 

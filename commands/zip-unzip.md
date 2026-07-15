@@ -1,5 +1,5 @@
 
-# zip / unzip：Linux 管理员不想用，但同事非要发 .zip 文件给你
+# zip / unzip：跨平台压缩——和 Windows/macOS 同事交换文件的标准格式
 
 在 Linux 世界，压缩的标准是 tar.gz。但现实是：非技术同事用的都是 Windows/macOS，他们只会右键 → 压缩为 .zip。如果你的工作流需要和"外面的世界"打交道，zip/unzip 是你绕不过去的。
 

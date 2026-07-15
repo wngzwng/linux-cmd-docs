@@ -1,4 +1,4 @@
-# 为什么 systemctl 很强，但大多数人只会 `start` 和 `stop`？
+# systemctl：服务管理——启动、停止、开机自启和日志查看
 
 > 很多人用 systemd 管服务，永远只会 `systemctl start/stop/restart nginx` 这三板斧。其实 systemctl 是一套完整的服务生命周期管理工具——查状态、看日志、设开机启动、分析依赖，一个命令搞定。
 

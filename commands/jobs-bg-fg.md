@@ -1,5 +1,5 @@
 
-# jobs / bg / fg / Ctrl+Z：被 screen/tmux 掩盖的真正实用的作业控制
+# jobs / bg / fg：前台、后台、暂停——Shell 内置的作业控制三态
 
 现在提到"后台运行"，大多数人第一反应是 tmux 或 screen。但 Shell 内建了一套存在了几十年的作业控制系统——`jobs`、`bg`、`fg`、Ctrl+Z——它们不需要装任何东西，而且在你没开 tmux 时能救命。
 

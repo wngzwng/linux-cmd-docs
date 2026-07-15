@@ -1,4 +1,4 @@
-# 为什么 curl 很强，但大多数人只会 `curl URL`？
+# curl：HTTP 请求的瑞士军刀——`-v` 调试、`-L` 重定向、`-d` POST
 
 > `curl` 是命令行里的 HTTP 客户端，也是 API 调试的第一工具。但大多数人只用它来"看一下返回内容"——`curl https://example.com`。其实 curl 能做的不只是 GET——POST、Header 定制、上传下载、代理、cookie、重定向跟踪，它几乎是命令行里最全能的网络工具。
 

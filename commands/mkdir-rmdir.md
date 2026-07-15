@@ -1,5 +1,5 @@
 
-# mkdir / rmdir：每个 Linux 用户都用过，但 90% 的人只用了一半
+# mkdir / rmdir：从 `-p` 递归到花括号展开，创建目录的正确姿势
 
 如果你问 Linux 用户"mkdir 怎么用"，答案都是 `mkdir dir`。再问"还有呢"，大部分人沉默了。
 

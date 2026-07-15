@@ -1,4 +1,4 @@
-# 为什么 docker 很强，但大多数人只会 `run` 和 `ps`？
+# docker：容器管理——从 `run`/`ps` 到镜像构建和日志排查
 
 > 很多人用 Docker 两年了，日常工作就是 `docker run`、`docker ps`、`docker stop`，排查问题时还是切回传统方式——进去容器里 ps、top、cat。其实 Docker CLI 本身就是一套完整的容器诊断工具，你不必每次都 exec 进去。
 

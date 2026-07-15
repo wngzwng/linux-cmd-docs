@@ -1,5 +1,5 @@
 
-# which / whereis：不是找不到命令，是你不知道它在哪
+# which / whereis：命令在哪——排查 "command not found" 的第一步
 
 你学了一个新命令，想试试——结果 Shell 说 "command not found"。你明明装了，为什么找不到？或者你找到了一个命令，想知道它到底执行的是哪个路径下的版本？
 

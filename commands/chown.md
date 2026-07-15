@@ -1,5 +1,5 @@
 
-# chown："Permission denied" 的终极解法——但用错了比不用更危险
+# chown：改文件所有者和组——`-R` 之前先确认目录
 
 如果你部署了一个 Web 应用，访问时看到 "Permission denied"，八成是文件所有者不对。Nginx 用 `www-data` 用户运行，但你的文件所有者是 `root`——它读不了。
 

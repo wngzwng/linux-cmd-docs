@@ -1,4 +1,4 @@
-# 为什么 parallel 是 xargs 的完全体，而你还在手写 for 循环？
+# parallel：并行批量执行——xargs 的升级版，多核机器的正确用法
 
 > 很多人用了好几年 Linux，处理批量任务还是写 `for f in *.mp4; do ffmpeg …; done`，CPU 16 个核心，常年只用 1 个。后来学会了 `xargs -P`，觉得已经"会并行"了——其实离「真正的并行调度引擎」还差得远。
 

@@ -1,4 +1,4 @@
-# 为什么 git 很强，但大多数人只用 add/commit/push？
+# git：版本控制——从 add/commit/push 到分支、回退和 stash
 
 > Git 是版本控制的事实标准。但大多数人只记住了三条命令：`git add .`、`git commit -m 'fix'`、`git push`。出了问题就删仓库重新 clone。其实 Git 是一个内容寻址的文件系统——理解了它的四个区域和指针模型，你就再也不会"先删了重来"。
 
