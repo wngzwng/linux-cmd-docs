@@ -58,6 +58,28 @@
 | `uniq` | 去重（先 sort） | [uniq.md](commands/uniq.md) |
 | `wc` | 统计行数/词数/字节数 | [wc.md](commands/wc.md) |
 
+### CSV 数据处理 —— csvkit 工具集
+
+> csvkit 是一套完整的 CSV 处理工具箱（13 个命令），覆盖筛选、排序、关联、统计、格式转换。全部命令读 stdin、写 stdout，可自由组合。
+>
+> 📖 [csvkit 总览与快速决策表](commands/csvkit/index.md)
+
+| 命令 | 速记 | 教程 |
+|------|------|------|
+| `csvcut` | 按列名/列号选列 | [csvcut.md](commands/csvkit/csvcut.md) |
+| `csvgrep` | 按值过滤行 | [csvgrep.md](commands/csvkit/csvgrep.md) |
+| `csvsort` | 按列排序 | [csvsort.md](commands/csvkit/csvsort.md) |
+| `csvjoin` | 两个表的 JOIN | [csvjoin.md](commands/csvkit/csvjoin.md) |
+| `csvstack` | 纵向拼接（UNION ALL） | [csvstack.md](commands/csvkit/csvstack.md) |
+| `csvstat` | 描述性统计 | [csvstat.md](commands/csvkit/csvstat.md) |
+| `csvlook` | 表格式人眼渲染 | [csvlook.md](commands/csvkit/csvlook.md) |
+| `csvsql` | 用 SQL 查 CSV | [csvsql.md](commands/csvkit/csvsql.md) |
+| `csvformat` | CSV 方言转换 | [csvformat.md](commands/csvkit/csvformat.md) |
+| `csvjson` | CSV → JSON | [csvjson.md](commands/csvkit/csvjson.md) |
+| `csvpy` | 进入 Python REPL | [csvpy.md](commands/csvkit/csvpy.md) |
+| `in2csv` | 各种格式 → CSV | [in2csv.md](commands/csvkit/in2csv.md) |
+| `sql2csv` | 数据库查询 → CSV | [sql2csv.md](commands/csvkit/sql2csv.md) |
+
 ### 权限管理
 
 | 命令 | 速记 | 教程 |
