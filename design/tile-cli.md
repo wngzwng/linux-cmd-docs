@@ -75,8 +75,8 @@ tile simulate \
 | `--stop-after-success` | int | — | 每行成功 N 次后提前停止（可选） |
 | `--rule` | string | PairClassic | 规则名，单值。传入多个报错 |
 | `--scorer` | string | PiKa | 算分器名称，单值。传入多个报错 |
-| `--scorer-config` | path | — | 算分配置 toml，内含 `[PiKa]` 等 per-scorer 段。simulate 仅解析 `--scorer` 对应的段 |
-| `--metrics-config` | path | — | 指标配置 toml（与 `--metrics-columns` **互斥**，同时传入直接报错） |
+| `--scorer-config` | path | — | 算分配置 toml，采用 `[scorer.<scorer>.<rule>]` 三段式（或 `[scorer.<scorer>]` 两段式简写）。simulate 按 `--scorer` + `--rule` 组合查找对应 section |
+| `--metrics-config` | path | — | 指标配置 toml（与 `--metrics-columns` **互斥**，同时传入直接报错）。文件不存在则直接报错退出 |
 | `--metrics-columns` | string | — | 指标列名逗号分隔（与 `--metrics-config` **互斥**，同时传入直接报错） |
 | `--softmax-temperature` | float | 0.5 | Softmax 温度。仅 Behaviour scorer（如 PiKa）生效；非 Behaviour scorer 下静默忽略，`--show-config` 中标注 `(not applicable)` |
 | `--show-config` | flag | — | 打印所有实际生效的参数及来源，然后退出（不执行模拟） |
@@ -108,26 +108,33 @@ metrics-config           (not set)          —
 metrics-columns          (not set)          —
 softmax-temperature      0.5                default
 
-=== Scorer: PiKa (from score.toml) ===
-Parameter                Value              
-─────────────────────────────────────────────
-weight_a                 1.0                
-weight_b                 0.8                
-weight_c                 0.6                
+=== Scorer: PiKa / Rule: PairClassic (from score-config.toml) ===
+Parameter                Value              Source
+─────────────────────────────────────────────────────────────
+weight_a                 1.0                file
+weight_b                 0.8                file
+weight_c                 0.6                default
 # ... 共 11 个权重
+
+=== Builtin (always output) ===
+Metric             Source
+───────────────────────────
+failure_rate       builtin
+avg_failure_step   builtin
 
 === Metrics: none ===
 No metrics configured. Specify --metrics-config or --metrics-columns.
 ```
 
-- 来源分为三档：`CLI`（用户显式传入）、`default`（内置默认值）、`<file>`（从配置文件读入）
+- 来源分为三档：`CLI`（用户显式传入）、`default`（内置默认值）、`file`（从配置文件读入，含 `file (scorer-level)` 标注两段式场景）
+- scorer 段标题标注当前生效的 scorer + rule 组合
 - `--scorer` 参数中的 `scorer` 指代算分算法名称，与子命令 `tile scorers`（列出/管理算分器）区分
-- 配置文件内的参数逐项展开，标注来自哪个文件
+- 配置文件内的参数逐项展开，标注来自哪个文件及对应 section
 - 传入 `--show-config` 后只打印信息并退出，不执行任何模拟
 
 ### 单条模式输出格式
 
-单条模式（`--level`）输出为 CSV 一行，列与批量模式输出一致（**始终输出** `id,success_rate,avg_score`；通过 `--metrics-config` 或 `--metrics-columns` 可追加 `median_score,std_score,min_score,max_score` 等指标列），id 列固定为 `single`（保持与批量模式列结构一致，便于下游脚本统一处理）。输出到 stdout；错误信息输出到 stderr。
+单条模式（`--level`）输出为 CSV 一行，列与批量模式输出一致（**始终输出** `id,failure_rate,avg_failure_step,success_rate,avg_score`；通过 `--metrics-config` 或 `--metrics-columns` 可追加 `median_score,std_score,min_score,max_score` 等指标列），id 列固定为 `single`（保持与批量模式列结构一致，便于下游脚本统一处理）。输出到 stdout；错误信息输出到 stderr。
 
 ---
 
@@ -136,7 +143,7 @@ No metrics configured. Specify --metrics-config or --metrics-columns.
 ```
 输入 CSV                          输出 CSV（不含 --preserve-columns）      错误 CSV
 ────────                          ────────────────────────────────        ─────────
-id,level_str,author               id,success_rate,avg_score[,median_score,std_score,…]              id,level_str,author,error
+id,level_str,author               id,failure_rate,avg_failure_step,success_rate,avg_score[,median_score,std_score,…]              id,level_str,author,error
 1,"...",Alice    ──模拟──▶        1,0.87,0.234,…                           5,"???",Eve,"invalid char
 2,"...",Bob      ──模拟──▶        2,0.91,0.198,…                            at position 3"
 3,"...",Alice    ──模拟──▶        3,0.76,0.301,…
@@ -149,7 +156,7 @@ id,level_str,author               id,success_rate,avg_score[,median_score,std_sc
 - 错误文件保留全部原始列 + 追加 `error` 列
 - `--preserve-columns` 下，若原始列与输出列有同名冲突（例如同时存在原始 `id` 列和模拟输出 `id` 列），原始列自动加 `_input` 后缀去重（如 `id_input`）
 - 单条模式（`--level`）走 stdout/stderr，不涉及上述分文件逻辑
-- **默认输出列**（未指定 `--metrics-config` 或 `--metrics-columns`）：`id, success_rate, avg_score`。指定后追加对应指标列
+- **默认输出列**（未指定 `--metrics-config` 或 `--metrics-columns`）：`id, failure_rate, avg_failure_step, success_rate, avg_score`（builtin + basic 组默认启用）。指定后追加对应指标列
 
 ### CSV 格式规范
 
@@ -169,64 +176,134 @@ id,level_str,author               id,success_rate,avg_score[,median_score,std_sc
 ## 三、`tile metrics`
 
 ```bash
-tile metrics --list                     # 列出所有支持的聚合指标
-tile metrics --generate ./metrics.toml  # 生成默认指标配置
+tile metrics --list                       # 或 -l，分组列出所有可用指标
+tile metrics --generate ./metrics.toml    # 生成默认指标配置
+tile metrics --validate ./metrics.toml    # 校验配置文件合法性
 ```
 
 | 参数 | 别名 | 说明 |
 |---|---|---|
-| `--list` | `-l` | 列出可用指标（名称 + 简短描述） |
-| `--generate <path>` | | 生成默认 metrics.toml |
+| `--list` | `-l` | 按组列出可用指标（名称 + 简短描述 + 默认启用状态） |
+| `--generate <path>` | | 生成包含所有指标分组及默认值的 metrics.toml |
+| `--validate <path>` | | 校验 metrics.toml 文件合法性（详见下方行为约定） |
 
 指标名仅允许字符 `[a-zA-Z0-9_]`，大小写不敏感，内部统一归一化为小写。
+
+`--list` 按组输出，格式示例如下（完整清单见 [metrics-config-toml.md](./metrics-config-toml.md)）：
+
+```
+=== builtin (always output, not configurable) ===
+  failure_rate       失败率
+  avg_failure_step   失败模拟的平均失败步数
+
+=== basic ===
+  success_rate    成功率
+  avg_score       平均得分
+
+=== distribution ===
+  median_score    得分中位数
+  std_score       得分标准差
+  min_score       最低得分
+  max_score       最高得分
+
+=== advanced ===
+  percentile_25   第 25 百分位数
+  percentile_75   第 75 百分位数
+```
 
 生成文件示例：
 
 ```toml
 # metrics.toml — 由 `tile metrics --generate` 生成，可修改后通过 --metrics-config 传入
 
-[metrics]
-enabled = ["success_rate", "avg_score", "median_score", "std_score", "min_score", "max_score"]
+[metrics.basic]
+success_rate = true
+avg_score = true
+
+[metrics.distribution]
+median_score = true
+std_score = true
+min_score = false
+max_score = false
 ```
+
+### `--validate` 行为约定
+
+```bash
+tile metrics --validate ./metrics.toml
+```
+
+校验流程（按序执行，首个失败即停止并报错）：
+
+1. **TOML 语法**：文件是否可成功解析
+2. **Section 命名合法性**：section 是否符合 `[metrics.<group>]` 规范，组名是否合法
+3. **指标名合法性**：指标名是否仅含 `[a-zA-Z0-9_]`，是否存在跨组重复
+4. **指标存在性**：指标名是否为内置已知指标（自定义指标输出 warning）
+
+| 场景 | 退出码 | 输出 |
+|---|---|---|
+| 全部通过 | 0 | 静默退出（无输出） |
+| 校验失败 | 1 | 具体错误信息输出到 stderr（含 section 名或指标名以辅助定位） |
 
 ---
 
 ## 四、`tile scorers`
 
 ```bash
-tile scorers --list                     # 或 -l，列出所有可用 scorer
-tile scorers --show PiKa                # 展示 PiKa 的默认权重系数
-tile scorers --generate ./score.toml    # 生成包含所有 scorer 默认配置的 toml
+tile scorers --list                       # 或 -l，列出所有可用 scorer
+tile scorers --show PiKa                  # 展示 PiKa 的默认权重系数
+tile scorers --generate ./score.toml      # 生成包含所有 scorer 默认配置的 toml
+tile scorers --validate ./score-config.toml  # 校验配置文件合法性
 ```
 
 生成文件示例：
 
 ```toml
-# score.toml — 由 `tile scorers --generate` 生成，可修改后通过 --scorer-config 传入
+# score-config.toml — 由 `tile scorers --generate` 生成，可修改后通过 --scorer-config 传入
 
-[PiKa]
+[scorer.PiKa.PairClassic]
 weight_a = 1.0
 weight_b = 0.8
 # ... 共 11 个权重
 
-[Random]
-# 无配置参数
+[scorer.PiKa.TripleTile]
+weight_a = 1.0
+weight_b = 0.8
+# ... 共 11 个权重
 ```
 
 | 参数 | 别名 | 说明 |
 |---|---|---|
 | `--list` | `-l` | 列出已注册 scorer（名称 + 模式 + 描述） |
 | `--show <name>` | | 展示指定 scorer 的默认系数 |
-| `--generate <path>` | | 生成包含所有 scorer 默认配置的 toml 文件 |
+| `--generate <path>` | | 生成包含所有 scorer × rule 组合默认配置的 toml 文件 |
+| `--validate <path>` | | 校验 score-config.toml 文件合法性（详见下方行为约定） |
 
 ### 现有 scorer
 
 | 名称 | 模式 | 说明 |
 |---|---|---|
 | `PiKa` | Behaviour | 11 个可配置权重 |
-| `Random` | Tile | 纯随机，无配置 |
 
 `Tokiki`、`Feature` 计划中。
+
+### `--validate` 行为约定
+
+```bash
+tile scorers --validate ./score-config.toml
+```
+
+校验流程（按序执行，首个失败即停止并报错）：
+
+1. **TOML 语法**：文件是否可成功解析
+2. **Section 命名合法性**：section 是否符合 `[scorer.<scorer>.<rule>]` 或 `[scorer.<scorer>]` 规范，scorer/rule 名称是否为已知值
+3. **参数类型**：各参数值类型是否与 scorer 定义一致（如浮点字段不能为字符串）
+4. **互斥约束**：同一 scorer 下是否存在两段式与三段式混用
+
+| 场景 | 退出码 | 输出 |
+|---|---|---|
+| 全部通过 | 0 | 静默退出（无输出） |
+| 校验失败 | 1 | 具体错误信息输出到 stderr（含行号或 section 名以辅助定位） |
 
 ---
 
@@ -305,3 +382,5 @@ tile completion -s zsh > ~/.zfunc/_tile
 | 2026-07-16 v7 | 新增 `tile completion` 子命令：`-s bash|zsh`，手写静态补全模板方案，输出到 stdout |
 | 2026-07-16 v8 | 明确 `--metrics-config` 与 `--metrics-columns` 同时传入直接报错；补充 CSV RFC 4180 格式规范；补充默认输出列清单；明确 `validate --rule` 默认值；明确 simulate 仅解析当前 scorer 段；新增 `--progress` flag；限制 metric 名称字符集 |
 | 2026-07-16 v9 | 微调：新增全局 `--help`/`--version` 约定；validate 批量输出去冗余 `rule` 列，`line_number` 注明 1-based；修正指标名字符集描述（`[a-zA-Z0-9_]` 大小写不敏感归一化）；明确 `--softmax-temperature` 非 Behaviour scorer 下静默忽略行为；补充单条模式 `id` 固定为 `single` 的设计理由 |
+| 2026-07-16 v10 | scorer 配置格式升级为三段式 `[scorer.<scorer>.<rule>]`，支持按规则定制参数；`--generate` 输出改为 scorer × rule 笛卡尔积；`--show-config` scorer 段新增 rule 维度和来源列；`tile scorers` 新增 `--validate` 子命令；metrics 配置升级为分组式 `[metrics.<group>]`（书写顺序即输出列顺序），`tile metrics` 新增 `--validate` 子命令 |
+| 2026-07-16 v11 | 同步 builtin 指标到主文档：默认输出列 3 列→5 列（`failure_rate`、`avg_failure_step` 前置）；批量 I/O 图示更新；`--show-config` 新增 builtin 段；`tile metrics --list` 补充分组输出样例；`--metrics-config` 参数表补充「文件不存在则报错」行为 |
